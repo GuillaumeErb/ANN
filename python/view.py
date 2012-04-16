@@ -1,5 +1,6 @@
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
+from PyQt4.QtSvg import *
 import sys
  
 class DrawingArea(QGraphicsView):
@@ -23,17 +24,9 @@ class DrawingArea(QGraphicsView):
         self.fitView()
 
     def fitView(self):
-        rect = QRectF(0, 0, 400, 300)
+        rect = QRectF(0, 0, 400, 400)
         self.fitInView(rect, Qt.KeepAspectRatio)
         self.setSceneRect(rect)
-
-    def extract():
-        printer = QPrinter(QPrinter.HighResolution);
-        printer.setPageSize(QPrinter.A4);
-        painter = QPainter(printer);
-
-        view.render(painter)
-
 
 class View:
 
@@ -43,22 +36,31 @@ class View:
 
         self.window = QWidget()
 
-        scene = QGraphicsScene()
-        drawingArea = DrawingArea()
-        drawingArea.setScene(scene)
-        drawingArea.setFixedSize(400, 300)
+        self.scene = QGraphicsScene()
+        self.drawingArea = DrawingArea()
+        self.drawingArea.setScene(self.scene)
+        self.drawingArea.setFixedSize(400, 400)
 
-        resetButton = QPushButton("Reset")
-        computeButton = QPushButton("Compute")
-        result = QLineEdit("Trololo")
-        result.setReadOnly(1)
+        self.resetButton = QPushButton("Reset")
+        self.computeButton = QPushButton("Compute")
+        self.result = QLineEdit("Trololo")
+        self.result.setReadOnly(1)
+        self.quitButton = QPushButton("Quit")
     
         layout = QGridLayout()
-        layout.addWidget(drawingArea, 0, 0, 3, 1)
-        layout.addWidget(resetButton, 0, 1)
-        layout.addWidget(computeButton, 1, 1)
-        layout.addWidget(result, 2, 1)
+        layout.addWidget(self.drawingArea, 0, 0, 4, 1)
+        layout.addWidget(self.resetButton, 0, 1)
+        layout.addWidget(self.computeButton, 1, 1)
+        layout.addWidget(self.result, 2, 1)
+        layout.addWidget(self.quitButton, 3, 1)
     
         self.window.setLayout(layout)
 
-
+    def render(self):
+        
+        pixmap = QImage(400, 400, QImage.Format_ARGB32_Premultiplied)
+        p = QPainter()
+        p.begin(pixmap)
+        self.scene.render(p)
+        p.end()
+        pixmap.save("../scene.png", "PNG")
